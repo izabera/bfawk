@@ -2,8 +2,11 @@
 # lol -bf
 
 function getchar() {
-  # eat up all the input
-  if (!readonce++) getline
+  if (read == NF) {
+    if (!getline) return 0
+    $0 = $0 RT
+    read = 0
+  }
   return char[$(++read)]
 }
 
@@ -12,6 +15,8 @@ BEGIN {
   FS = ""
 
   getline prog < ARGV[ARGC = 1]
+
+  RS = "\n"
 
   gsub(/[^][<>,.+-]/, "", prog)
 
