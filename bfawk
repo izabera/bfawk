@@ -1,6 +1,12 @@
 #!/bin/gawk -bf
 # lol -bf
 
+function getchar() {
+  # eat up all the input
+  if (!readonce++) getline
+  return char[$(++read)]
+}
+
 BEGIN {
   RS = "\0"
   FS = ""
@@ -49,9 +55,6 @@ BEGIN {
   # lookup table for characters
   for (c = 0; c <= 255; c++) char[sprintf("%c", c)] = c
 
-  # eat up all the input
-  getline
-
   cell = 0
   for (pos = 1; pos <= len; pos++) {
     switch (program[pos]) {
@@ -59,7 +62,7 @@ BEGIN {
       case "-": tape[cell] = and(tape[cell] - rle[pos], 255); break
       case ">": cell += rle[pos]                            ; break
       case "<": cell -= rle[pos]                            ; break
-      case ",": tape[cell] = char[$(++read)]                ; break
+      case ",": tape[cell] = getchar()                      ; break
       case ".": printf("%c", tape[cell])                    ; break
       case "z": tape[cell] = 0                              ; break
       case "[": if (!tape[cell]) pos = jump[pos]            ; break
