@@ -21,7 +21,7 @@ BEGIN {
   gsub(/[^][<>,.+-]/, "", prog)
 
   # optimizations
-  while (prog ~ /<>|><|\+-|-\+|[+-]z|zz+/) {
+  while (prog ~ /<>|><|\+-|-\+|\[[+-]]|[+-]z|zz+/) {
     # clear loops
     gsub(/\[[+-]]/, "z", prog)
 
@@ -43,9 +43,16 @@ BEGIN {
   # rle
   i = 1
   for (pos = 1; pos <= len; pos++) {
-    if (program[pos] ~ /[<>+-]/) {
-      while (program[pos] == program[pos+(++rle[i])]);
-      pos += rle[i]-1
+    switch (program[pos]) {
+      case /[<>+-]/:
+        while (program[pos] == program[pos+(++rle[i])]);
+        pos += rle[i]-1
+        break
+      case "z":
+        # optimize [-]+++
+        while (program[pos+1] == "+") { rle[i] = and(rle[i]+1, 255); pos++ }
+        while (program[pos+1] == "-") { rle[i] = and(rle[i]-1, 255); pos++ }
+        program[pos] = "z"
     }
     program[i++] = program[pos]
   }
@@ -57,7 +64,6 @@ BEGIN {
     else if (program[pos] == "]") jump[jump[pos] = stack[--depth]] = pos
   }
 
-  # lookup table for characters
   for (c = 0; c <= 255; c++) char[sprintf("%c", c)] = c
 
   cell = 0
@@ -68,8 +74,8 @@ BEGIN {
       case ">": cell += rle[pos]                            ; break
       case "<": cell -= rle[pos]                            ; break
       case ",": tape[cell] = getchar()                      ; break
-      case ".": printf("%c", tape[cell])                    ; break
-      case "z": tape[cell] = 0                              ; break
+      case ".": printf("%c", tape[cell]); fflush()          ; break
+      case "z": tape[cell] = rle[pos]                       ; break
       case "[": if (!tape[cell]) pos = jump[pos]            ; break
       case "]": if ( tape[cell]) pos = jump[pos]            ; break
       case "r": while (tape[cell]) cell++                   ; break
