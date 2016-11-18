@@ -21,12 +21,14 @@ BEGIN {
   gsub(/[^][<>,.+-]/, "", prog)
 
   # optimizations
-  while (prog ~ /<>|><|\+-|-\+|\[[+-]]|[+-]z|zz+/) {
+  while (prog ~ /<>|><|\+-|-\+|\[[+-]]|[+-]z|zz+|[z\]]\[[^]]*]/) {
     # clear loops
     gsub(/\[[+-]]/, "z", prog)
 
     # dead code
     gsub(/<>|><|\+-|-\+/, "", prog)
+    gsub(/z\[[^]]*]/, "z", prog)
+    gsub(/]\[[^]]*]/, "]", prog)
     gsub(/[+-]+z/, "z", prog)
     gsub(/zz+/, "z", prog)
   }
