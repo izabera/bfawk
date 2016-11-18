@@ -5,7 +5,7 @@ BEGIN {
   RS = "\0"
   FS = ""
 
-  prog = ARGV[ARGC = 1]
+  getline prog < ARGV[ARGC = 1]
 
   gsub(/[^][<>,.+-]/, "", prog)
 
