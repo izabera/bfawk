@@ -10,6 +10,11 @@ function getchar() {
   return char[$(++read)]
 }
 
+function byte(val) {
+    val %= 256
+    return val < 0 ? val + 256 : val
+}
+
 BEGIN {
   RS = "\0"
   FS = ""
@@ -52,8 +57,8 @@ BEGIN {
         break
       case "z":
         # optimize [-]+++
-        while (program[pos+1] == "+") { rle[i] = and(rle[i]+1, 255); pos++ }
-        while (program[pos+1] == "-") { rle[i] = and(rle[i]-1, 255); pos++ }
+        while (program[pos+1] == "+") { rle[i] = byte(rle[i]+1); pos++ }
+        while (program[pos+1] == "-") { rle[i] = byte(rle[i]-1); pos++ }
         program[pos] = "z"
     }
     program[i++] = program[pos]
@@ -71,19 +76,19 @@ BEGIN {
   cell = 0
   for (pos = 1; pos <= len; pos++) {
     switch (program[pos]) {
-      case "+": tape[cell] = and(tape[cell] + rle[pos], 255); break
-      case "-": tape[cell] = and(tape[cell] - rle[pos], 255); break
-      case ">": cell += rle[pos]                            ; break
-      case "<": cell -= rle[pos]                            ; break
-      case ",": tape[cell] = getchar()                      ; break
-      case ".": printf("%c", tape[cell]); fflush()          ; break
-      case "z": tape[cell] = rle[pos]                       ; break
-      case "[": if (!tape[cell]) pos = jump[pos]            ; break
-      case "]": if ( tape[cell]) pos = jump[pos]            ; break
-      case "r": while (tape[cell]) cell++                   ; break
-      case "l": while (tape[cell]) cell--                   ; break
-      case "R": while (tape[cell]) cell += 2                ; break
-      case "L": while (tape[cell]) cell -= 2                ; break
+      case "+": tape[cell] = byte(tape[cell] + rle[pos]); break
+      case "-": tape[cell] = byte(tape[cell] - rle[pos]); break
+      case ">": cell += rle[pos]                        ; break
+      case "<": cell -= rle[pos]                        ; break
+      case ",": tape[cell] = getchar()                  ; break
+      case ".": printf("%c", tape[cell]); fflush()      ; break
+      case "z": tape[cell] = rle[pos]                   ; break
+      case "[": if (!tape[cell]) pos = jump[pos]        ; break
+      case "]": if ( tape[cell]) pos = jump[pos]        ; break
+      case "r": while (tape[cell]) cell++               ; break
+      case "l": while (tape[cell]) cell--               ; break
+      case "R": while (tape[cell]) cell += 2            ; break
+      case "L": while (tape[cell]) cell -= 2            ; break
     }
   }
 }
